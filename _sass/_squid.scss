@@ -1,0 +1,208 @@
+.squid-hero {
+  background: linear-gradient(135deg, lighten($brand-color, 35%), lighten($brand-color, 10%));
+  color: #0b2545;
+  border: 1px solid $grey-color-light;
+  border-radius: 12px;
+  padding: $spacing-unit;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  margin-bottom: $spacing-unit;
+}
+
+.squid-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.squid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  color: $text-color;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: $small-font-size;
+  font-weight: 600;
+}
+
+.squid-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: $spacing-unit;
+}
+
+.squid-card {
+  background: #fff;
+  border: 1px solid $grey-color-light;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: $spacing-unit / 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.squid-card h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.squid-card h4 {
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+
+.squid-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 16px;
+}
+
+.squid-inputs label {
+  font-size: $small-font-size;
+  font-weight: 600;
+  color: $grey-color-dark;
+}
+
+.squid-inputs input,
+.squid-inputs select,
+.squid-inputs textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid $grey-color-light;
+  background: #fafafa;
+  font-size: 15px;
+}
+
+.squid-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-primary {
+  background: $brand-color;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(42, 122, 226, 0.25);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: $brand-color;
+  border: 1px solid lighten($brand-color, 15%);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: $grey-color-dark;
+  border: 1px dashed $grey-color-light;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e6f4ea;
+  color: #1b4332;
+  font-weight: 700;
+  border: 1px solid #95d5b2;
+}
+
+.status-pill.is-offline {
+  background: #fff4e6;
+  color: #9a3412;
+  border-color: #fbc687;
+}
+
+.table-lite {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.table-lite th,
+.table-lite td {
+  padding: 10px;
+  border-bottom: 1px solid $grey-color-light;
+  font-size: 14px;
+}
+
+.table-lite th {
+  text-align: left;
+  color: $grey-color;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-size: 12px;
+}
+
+.code-block {
+  background: #0c1b33;
+  color: #e2ecff;
+  border-radius: 12px;
+  padding: 14px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.metric {
+  background: #f7f9fc;
+  border: 1px solid $grey-color-light;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.metric strong {
+  display: block;
+  font-size: 22px;
+}
+
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.badge {
+  padding: 6px 10px;
+  background: #eef2ff;
+  color: $brand-color;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+@media (max-width: $on-laptop) {
+  .squid-grid {
+    grid-template-columns: 1fr;
+  }
+}
