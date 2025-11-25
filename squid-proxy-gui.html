@@ -1,0 +1,366 @@
+---
+layout: default
+title: Squid Proxy GUI
+---
+
+<div class="squid-hero">
+  <div class="squid-badge">🦑 Squid proxy GUI · Full feature set</div>
+  <h1>Squid Proxy Control Center</h1>
+  <p>Design your Squid deployment, craft ACLs, tune caching, and export a ready-to-apply configuration from a single control pane.</p>
+  <div class="squid-hero__actions">
+    <button class="btn-primary" id="startProxy">Start / Enable service</button>
+    <button class="btn-secondary" id="reloadProxy">Hot reload &amp; validate</button>
+    <button class="btn-ghost" id="dryRun">Dry-run config &amp; lint</button>
+    <span class="squid-badge">🔒 RBAC aware</span>
+    <span class="squid-badge">📜 ACL composer</span>
+    <span class="squid-badge">📦 Cache accelerator</span>
+  </div>
+</div>
+
+<div class="squid-grid">
+  <div>
+    <div class="squid-card">
+      <h3>Deployment settings</h3>
+      <div class="squid-inputs">
+        <label>Instance name<input type="text" id="instanceName" placeholder="edge-proxy-01" value="edge-proxy-01"></label>
+        <label>Bind address<input type="text" id="bindAddress" placeholder="0.0.0.0"></label>
+        <label>Port<input type="number" id="port" placeholder="3128" value="3128"></label>
+        <label>Mode
+          <select id="mode">
+            <option value="forward">Forward proxy</option>
+            <option value="transparent">Transparent / intercept</option>
+            <option value="reverse">Reverse proxy</option>
+          </select>
+        </label>
+        <label>Workers<input type="number" id="workers" min="1" value="4"></label>
+        <label>Max connections<input type="number" id="maxConnections" min="1" value="2048"></label>
+        <label>Failover peer<input type="text" id="failoverPeer" placeholder="cache-peer.example.com:3128"></label>
+      </div>
+      <div class="squid-actions">
+        <button class="btn-primary" id="saveDeployment">Save profile</button>
+        <button class="btn-ghost" id="testConnectivity">Test connectivity</button>
+      </div>
+    </div>
+
+    <div class="squid-card">
+      <h3>Authentication &amp; security</h3>
+      <div class="squid-inputs">
+        <label>Access policy
+          <select id="authMode">
+            <option value="open">Open relay (not recommended)</option>
+            <option value="basic">Basic auth</option>
+            <option value="ntlm">NTLM</option>
+            <option value="oauth">OAuth 2.0 gateway</option>
+          </select>
+        </label>
+        <label>Realm / prompt<input type="text" id="realm" placeholder="Proxy login" value="Proxy login"></label>
+        <label>Credentials source<input type="text" id="credentialSource" placeholder="/etc/squid/passwords"></label>
+        <label>Allowed methods
+          <select id="methods" multiple>
+            <option selected>CONNECT</option>
+            <option selected>GET</option>
+            <option selected>POST</option>
+            <option>PUT</option>
+            <option>DELETE</option>
+          </select>
+        </label>
+        <label>Block malware / ads
+          <select id="malwareFilter">
+            <option value="off">Disabled</option>
+            <option value="balanced" selected>Balanced (recommended)</option>
+            <option value="strict">Strict</option>
+          </select>
+        </label>
+        <label>Request size limit (MB)<input type="number" id="requestSize" value="128"></label>
+      </div>
+      <div class="badge-list">
+        <span class="badge">Certificate pinning</span>
+        <span class="badge">TLS inspection policy</span>
+        <span class="badge">WAF handoff hook</span>
+      </div>
+    </div>
+
+    <div class="squid-card">
+      <h3>Access control lists</h3>
+      <div class="squid-inputs">
+        <label>Rule name<input type="text" id="aclName" placeholder="corp-lan"></label>
+        <label>Type
+          <select id="aclType">
+            <option value="src">Source CIDR</option>
+            <option value="dst">Destination CIDR</option>
+            <option value="dstdomain">Domain</option>
+            <option value="method">HTTP method</option>
+            <option value="port">Port</option>
+          </select>
+        </label>
+        <label>Match value<input type="text" id="aclValue" placeholder="10.0.0.0/8"></label>
+        <label>Action
+          <select id="aclAction">
+            <option value="allow">Allow</option>
+            <option value="deny">Deny</option>
+            <option value="require">Require authentication</option>
+          </select>
+        </label>
+        <label>Notes<input type="text" id="aclNotes" placeholder="Business hours only"></label>
+      </div>
+      <div class="squid-actions">
+        <button class="btn-primary" id="addAcl">Add rule</button>
+        <button class="btn-secondary" id="resetAcl">Reset defaults</button>
+      </div>
+      <table class="table-lite" aria-label="ACL table">
+        <thead>
+          <tr><th>Name</th><th>Type</th><th>Value</th><th>Action</th><th></th></tr>
+        </thead>
+        <tbody id="aclTable"></tbody>
+      </table>
+    </div>
+
+    <div class="squid-card">
+      <h3>Cache &amp; performance</h3>
+      <div class="squid-inputs">
+        <label>Memory cache (MB)<input type="number" id="memCache" value="512"></label>
+        <label>Disk cache (GB)<input type="number" id="diskCache" value="20"></label>
+        <label>Cache directory<input type="text" id="cacheDir" value="/var/spool/squid"></label>
+        <label>Refresh pattern TTL<input type="text" id="refreshTtl" value="2 days"></label>
+        <label>Collapsed forwarding<select id="collapsedForwarding"><option value="on" selected>On</option><option value="off">Off</option></select></label>
+        <label>Maximum object size (MB)<input type="number" id="maxObj" value="512"></label>
+      </div>
+      <div class="squid-actions">
+        <button class="btn-primary" id="tuneCache">Apply tuning</button>
+        <button class="btn-ghost" id="purgeCache">Purge caches</button>
+      </div>
+    </div>
+
+    <div class="squid-card">
+      <h3>SSL / TLS handling</h3>
+      <div class="squid-inputs">
+        <label>SSL bump policy
+          <select id="sslBump">
+            <option value="off">Disabled</option>
+            <option value="peek">Peek</option>
+            <option value="splice">Splice</option>
+            <option value="bump">Bump all</option>
+          </select>
+        </label>
+        <label>Certificate chain<input type="text" id="certPath" placeholder="/etc/squid/certs/ca.pem"></label>
+        <label>Key file<input type="text" id="keyPath" placeholder="/etc/squid/certs/ca.key"></label>
+        <label>Allowed TLS versions<input type="text" id="tlsVersions" value="1.2 1.3"></label>
+      </div>
+      <div class="badge-list">
+        <span class="badge">OCSP stapling</span>
+        <span class="badge">HSTS aware</span>
+        <span class="badge">MITM exclusions</span>
+      </div>
+    </div>
+
+    <div class="squid-card">
+      <h3>Logging, telemetry &amp; alerts</h3>
+      <div class="squid-inputs">
+        <label>Access log path<input type="text" id="accessLog" value="/var/log/squid/access.log"></label>
+        <label>Cache log path<input type="text" id="cacheLog" value="/var/log/squid/cache.log"></label>
+        <label>Log level
+          <select id="logLevel">
+            <option value="error">Error</option>
+            <option value="warn">Warning</option>
+            <option value="info" selected>Info</option>
+            <option value="debug">Debug</option>
+          </select>
+        </label>
+        <label>Health check interval (s)<input type="number" id="healthInterval" value="30"></label>
+        <label>Alert webhook<input type="url" id="alertWebhook" placeholder="https://hooks.example.com/squid"></label>
+        <label>Rotate logs after (MB)<input type="number" id="rotateSize" value="200"></label>
+      </div>
+      <div class="squid-actions">
+        <button class="btn-primary" id="enableTelemetry">Enable telemetry</button>
+        <button class="btn-ghost" id="rotateLogs">Rotate logs</button>
+      </div>
+    </div>
+
+    <div class="squid-card">
+      <h3>Preview &amp; export</h3>
+      <p>Generate a human-friendly preview of the squid.conf that reflects the controls above.</p>
+      <div class="code-block" id="configPreview">acl localnet src 10.0.0.0/8
+acl SSL_ports port 443
+http_access allow localnet
+http_port 3128
+cache_mem 512 MB</div>
+      <div class="squid-actions">
+        <button class="btn-primary" id="generatePreview">Generate configuration</button>
+        <button class="btn-secondary" id="downloadConfig">Download preview</button>
+        <button class="btn-ghost" id="resetForm">Reset form</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="squid-card">
+      <h3>Service status</h3>
+      <p><span class="status-pill" id="serviceStatus">● Online</span></p>
+      <div class="metrics-grid">
+        <div class="metric"><strong id="requestsMetric">1.2k</strong><small>Requests / min</small></div>
+        <div class="metric"><strong id="hitMetric">87%</strong><small>Cache hit ratio</small></div>
+        <div class="metric"><strong id="cpuMetric">32%</strong><small>CPU utilization</small></div>
+        <div class="metric"><strong id="memMetric">2.1 GB</strong><small>Memory used</small></div>
+      </div>
+      <div class="squid-actions">
+        <button class="btn-secondary" id="safeRestart">Safe restart</button>
+        <button class="btn-ghost" id="clearCounters">Clear counters</button>
+      </div>
+    </div>
+
+    <div class="squid-card">
+      <h3>Operational tasks</h3>
+      <ul class="post-list">
+        <li>🔄 Sync ACLs across cluster</li>
+        <li>🧹 Purge domain: <strong>example.com</strong></li>
+        <li>🧭 Trace request flow with x-cache headers</li>
+        <li>🛡️ Export audit report (24h)</li>
+      </ul>
+      <div class="squid-actions">
+        <button class="btn-primary" id="traceRequest">Run trace</button>
+        <button class="btn-secondary" id="exportAudit">Export audit</button>
+      </div>
+    </div>
+
+    <div class="squid-card">
+      <h3>Health timeline</h3>
+      <p id="healthTimeline">Last reload: just now · No incidents detected.</p>
+      <p><strong>Next actions:</strong> schedule weekly cert rotation, verify OCSP stapling, archive logs to cold storage.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const aclTable = document.getElementById('aclTable');
+    const preview = document.getElementById('configPreview');
+    const statusPill = document.getElementById('serviceStatus');
+    const healthTimeline = document.getElementById('healthTimeline');
+
+    let aclEntries = [
+      { name: 'localnet', type: 'src', value: '10.0.0.0/8', action: 'allow' },
+      { name: 'ssl_ports', type: 'port', value: '443', action: 'allow' }
+    ];
+
+    const getValue = (id) => document.getElementById(id).value || '';
+
+    const renderAcl = () => {
+      aclTable.innerHTML = '';
+      aclEntries.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${entry.name}</td><td>${entry.type}</td><td>${entry.value}</td><td>${entry.action}</td>` +
+          `<td><button class="btn-ghost" data-index="${index}">Remove</button></td>`;
+        aclTable.appendChild(row);
+      });
+    };
+
+    const updatePreview = () => {
+      const lines = [];
+      lines.push(`# ${getValue('instanceName')} · ${getValue('mode')} mode`);
+      lines.push(`http_port ${getValue('bindAddress') || '0.0.0.0'}:${getValue('port') || '3128'}`);
+      lines.push(`workers ${getValue('workers') || 1}`);
+      lines.push(`maxconn ${getValue('maxConnections') || 1024}`);
+      if (getValue('failoverPeer')) {
+        lines.push(`# Failover peer: ${getValue('failoverPeer')}`);
+      }
+      aclEntries.forEach((entry) => {
+        lines.push(`acl ${entry.name} ${entry.type} ${entry.value}`);
+      });
+      aclEntries.forEach((entry) => {
+        lines.push(`${entry.action === 'allow' ? 'http_access allow' : entry.action === 'deny' ? 'http_access deny' : 'http_access allow auth'} ${entry.name}`);
+      });
+      lines.push(`cache_mem ${getValue('memCache') || 256} MB`);
+      lines.push(`cache_dir aufs ${getValue('cacheDir') || '/var/spool/squid'} ${getValue('diskCache') || 10} 16 256`);
+      lines.push(`maximum_object_size ${getValue('maxObj') || 512} MB`);
+      lines.push(`refresh_pattern . ${getValue('refreshTtl') || '1 day'} 20% 4320`);
+      lines.push(`collapsed_forwarding ${getValue('collapsedForwarding')}`);
+      lines.push(`request_size ${getValue('requestSize')} MB`);
+      lines.push(`auth_mode ${getValue('authMode')} realm="${getValue('realm') || 'Proxy login'}" credentials="${getValue('credentialSource') || ''}"`);
+      lines.push(`logfile_rotate ${getValue('rotateSize') || 200}`);
+      lines.push(`# Telemetry -> ${getValue('alertWebhook') || 'no webhook configured'}`);
+      lines.push(`# SSL bump: ${getValue('sslBump')} | cert=${getValue('certPath')} | key=${getValue('keyPath')} | tls=${getValue('tlsVersions')}`);
+      preview.textContent = lines.join('\n');
+    };
+
+    renderAcl();
+    updatePreview();
+
+    document.getElementById('addAcl').addEventListener('click', () => {
+      const name = getValue('aclName');
+      const type = getValue('aclType');
+      const value = getValue('aclValue');
+      const action = getValue('aclAction');
+      if (!name || !value) return;
+      aclEntries.push({ name, type, value, action });
+      renderAcl();
+      updatePreview();
+    });
+
+    document.getElementById('resetAcl').addEventListener('click', () => {
+      aclEntries = [
+        { name: 'localnet', type: 'src', value: '10.0.0.0/8', action: 'allow' },
+        { name: 'ssl_ports', type: 'port', value: '443', action: 'allow' }
+      ];
+      renderAcl();
+      updatePreview();
+    });
+
+    aclTable.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target.matches('button[data-index]')) {
+        const index = Number(target.dataset.index);
+        aclEntries.splice(index, 1);
+        renderAcl();
+        updatePreview();
+      }
+    });
+
+    const setStatus = (text, online = true) => {
+      statusPill.textContent = `● ${text}`;
+      statusPill.classList.toggle('is-offline', !online);
+      healthTimeline.textContent = online ? 'Last reload: just now · Healthy.' : 'Service paused · Apply changes to resume.';
+    };
+
+    const buttons = {
+      startProxy: () => setStatus('Running', true),
+      reloadProxy: () => setStatus('Reloaded configuration', true),
+      dryRun: () => setStatus('Dry-run successful', true),
+      testConnectivity: () => setStatus('Connectivity ok', true),
+      purgeCache: () => setStatus('Cache purged', true),
+      safeRestart: () => setStatus('Restarting...', true),
+      clearCounters: () => setStatus('Counters cleared', true)
+    };
+
+    Object.entries(buttons).forEach(([id, handler]) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', handler);
+    });
+
+    document.getElementById('generatePreview').addEventListener('click', updatePreview);
+
+    document.getElementById('downloadConfig').addEventListener('click', () => {
+      updatePreview();
+      const blob = new Blob([preview.textContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${getValue('instanceName') || 'squid'}-preview.conf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('resetForm').addEventListener('click', () => {
+      document.querySelectorAll('input, select').forEach((el) => {
+        if (el.type === 'number') {
+          el.value = el.defaultValue;
+        } else {
+          el.value = el.defaultValue || '';
+        }
+      });
+      aclEntries = [];
+      renderAcl();
+      updatePreview();
+      setStatus('Online', true);
+    });
+  });
+</script>
